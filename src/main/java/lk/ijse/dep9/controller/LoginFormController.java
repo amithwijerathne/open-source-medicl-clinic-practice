@@ -48,22 +48,30 @@ public class LoginFormController {
 //        }
         Class.forName("com.mysql.cj.jdbc.Driver");
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/medical_clinic", "root", "ch1993@AM");){
-            String sql = "SELECT role FROM User WHERE username = '%s' AND password = '%s'";
-            sql = String.format(sql,username,password);
+//            String sql = "SELECT role FROM User WHERE username = '%s' AND password = '%s'";
+//            sql = String.format(sql,username,password);
+//
+//            Statement stm = connection.createStatement();
+//            ResultSet rst = stm.executeQuery(sql);
 
-            Statement stm = connection.createStatement();
-            ResultSet rst = stm.executeQuery(sql);
+            String sql = "SELECT role FROM User WHERE username =? AND password =?";
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setString(1,username);
+            stm.setString(2,password);
+            ResultSet rst = stm.executeQuery();
+
+
             if (rst.next()){
                 String role = rst.getString("role");
                 SecurityContexHolder.setPrinciple(new User(username, UserRole.valueOf(role)));
                 System.out.println(role);
                 Scene scene = null;
                 switch (role){
-                    case "Admin":
-                        scene = new Scene(FXMLLoader.load(this.getClass().getResource("/view/AdminForm.fxml")));
-                        break;
                     case "Doctor":
                         scene = new Scene(FXMLLoader.load(this.getClass().getResource("/view/DoctorDashboardForm.fxml")));
+                        break;
+                    case "Admin":
+                        scene = new Scene(FXMLLoader.load(this.getClass().getResource("/view/AdminForm.fxml")));
                         break;
                     default:
                         scene = new Scene(FXMLLoader.load(this.getClass().getResource("/view/ReceptionistDashboardForm.fxml")));
